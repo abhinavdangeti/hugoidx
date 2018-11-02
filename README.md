@@ -1,7 +1,3 @@
-# This project has been retired
-
-This project has been retired due to upstream API changes in Hugo.
-
 ## hugoidx
 
 

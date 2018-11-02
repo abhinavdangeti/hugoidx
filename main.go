@@ -6,7 +6,7 @@ import (
 	"github.com/blevesearch/bleve/mapping"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/hugo/commands"
+	"github.com/gohugoio/hugo/deps"
 	"github.com/spf13/hugo/hugolib"
 	"github.com/spf13/viper"
 
@@ -38,7 +38,6 @@ func InitializeConfig() {
 	if hugoCmdV.PersistentFlags().Lookup("verbose").Changed {
 		viper.Set("Verbose", Verbose)
 	}
-	commands.InitializeConfig()
 }
 
 func LoadDefaultSettings() {
@@ -46,8 +45,7 @@ func LoadDefaultSettings() {
 }
 
 func buildindex() {
-	site := &hugolib.Site{}
-	err := site.Process()
+	site, err := hugolib.NewSite(deps.DepsCfg{})
 	if err != nil {
 		jww.FATAL.Printf("error processing site: %v", err)
 	}
@@ -60,14 +58,11 @@ func buildindex() {
 
 	for _, p := range site.Pages {
 		// current work around for issue #2
-		if len(p.Title) <= 0 {
+		if len(p.Title()) <= 0 {
 			continue
 		}
 		jww.INFO.Printf("params: %#v", p.Params)
-		rpl, err := p.RelPermalink()
-		if err != nil {
-			jww.FATAL.Printf("error generating permalink: %v", err)
-		}
+		rpl := p.RelPermalink()
 		jww.INFO.Printf("Indexing: %s as - %s (% x)", p.Title, rpl, rpl)
 		pi := NewPageForIndex(p)
 
